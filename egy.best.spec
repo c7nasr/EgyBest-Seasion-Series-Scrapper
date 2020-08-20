@@ -3,7 +3,7 @@
 block_cipher = None
 
 
-a = Analysis(['egy.best.py'],
+a = Analysis(['egybest_gui.py'],
              pathex=['D:\\Programming\\EgyBest Scrapper'],
              binaries=[('chromedriver.exe', '.')],
              datas=[],
@@ -23,11 +23,12 @@ exe = EXE(pyz,
           a.zipfiles,
           a.datas,
           [],
-          name='EGYBEST Series Scrapper',
+          name='EGYBEST Scrapper',
           debug=False,
+          uac_admin=True,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=False , icon='icon.ico')
+          console=False , icon='logo.ico')

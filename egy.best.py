@@ -25,11 +25,11 @@ name = link.split("season/")
 name = name[1].replace("/","")
 name = name.split("?")
 
-path = os.path.join(sys._MEIPASS,"chromedriver.exe" )
+# path = os.path.join(sys._MEIPASS,"chromedriver.exe" )
 opt = webdriver.ChromeOptions()
-opt.add_argument('headless')
+# opt.add_argument('headless')
 
-driver = webdriver.Chrome(path,options=opt)
+driver = webdriver.Chrome(options=opt)
 
 
 driver.get(link)
