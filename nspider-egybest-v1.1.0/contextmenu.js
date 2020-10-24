@@ -1,4 +1,3 @@
-const BASE_LINK = "https://nspider.herokuapp.com/";
 
 function get_current_tab_url() {
   return new Promise((resolve, reject) => {
@@ -8,6 +7,10 @@ function get_current_tab_url() {
         lastFocusedWindow: true,
       },
       (tabs) => {
+        if (tabs.length === 0){
+          alert("Chrome Error. Just Refresh the Page and Try again")
+          reject("Chrome Error. Just Refresh the Page and Try again")
+        }
         var tab = tabs[0];
         var tab_url = tab.url;
         resolve(tab_url);
@@ -25,6 +28,8 @@ function get_cookies(domain, name) {
       function (res) {
         if (res) {
           resolve(res.value);
+        } else {
+          resolve("Wrong Value");
         }
       }
     );
@@ -86,38 +91,47 @@ async function go_to_video_stream(api_links, current_domain) {
     const domain = "https://" + current_domain.split("/")[2];
     const cookie = await get_cookies(domain, "PSSID");
     const vsl = [];
-    var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
+    console.log(domain);
     for (let index = 0; index < api_links.length; index++) {
-      const element = api_links[index];
+      try {
+        const element = api_links[index];
+        var myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        myHeaders.append("Cookie", "PSSID=" + cookie);
+  
+        var requestOptions = {
+          method: "POST",
+          headers: myHeaders,
+          redirect: "follow",
+        };
+        const video_stream_link = await fetch(
+          domain + element,
+          requestOptions
+        );
+    
+        vsl.push(video_stream_link.url);
+      } catch (error) {
+        console.log(error);
+        continue
+      }
 
-      var raw = JSON.stringify({
-        url: element,
-        cookie: "PSSID=" + cookie,
-      });
-      var requestOptions = {
-        method: "POST",
-        headers: myHeaders,
-        body: raw,
-        redirect: "follow",
-      };
-      const video_stream_link = await fetch(BASE_LINK, requestOptions);
-      const json_vsl = await video_stream_link.json();
-      vsl.push(json_vsl.url);
     }
     resolve(vsl);
-  });
+  })
 }
 
 async function get_direct_links(video_streams_links) {
+  var vs_links = video_streams_links;
+  console.log(vs_links);
   return new Promise(async (resolve, rejected) => {
     let broken_direct = {};
     broken_direct.direct = [];
     broken_direct.broken = [];
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
     for (let i = 0; i < video_streams_links.length; i++) {
-      var myHeaders = new Headers();
-      myHeaders.append("Content-Type", "application/json");
       const element = video_streams_links[i];
+      console.log(element);
       const domain = "https://" + element.split("/")[2];
       const cookie = await get_cookies(domain, "PHPSID");
       const path = element.split("/")[4];
@@ -131,20 +145,21 @@ async function get_direct_links(video_streams_links) {
         body: raw,
         headers: myHeaders,
       };
-      const direct_link_dom = await fetch(`${BASE_LINK}d`, requestOptions);
+      const direct_link_dom = await fetch(element, requestOptions);
       const dom_text = await direct_link_dom.text();
       const parser = new DOMParser();
       const htmlDocument = parser.parseFromString(dom_text, "text/html");
       var query_element = htmlDocument.documentElement.querySelectorAll(
         ".bigbutton"
       );
-
+      console.log(query_element[0].href);
       if (query_element[0].href) {
         broken_direct.direct.push(query_element[0].href);
       } else {
         broken_direct.broken.push(element);
       }
     }
+
     resolve(broken_direct);
   });
 }
@@ -190,6 +205,7 @@ function save_links(arrLinks, name) {
 }
 async function start() {
   const current_url = await get_current_tab_url();
+  const season_name = current_url.split("season/")[1].replace("/", "");
 
   const episode_links = await get_episodes_links(current_url);
 
@@ -199,7 +215,6 @@ async function start() {
 
   const direct_links = await get_direct_links(video_stream);
 
-  const season_name = current_url.split("season/")[1].replace("/", "");
   let final_links = [];
 
   if (direct_links.broken) {
