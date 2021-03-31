@@ -53,7 +53,7 @@ class egybest:
         self.opt.add_argument("hide_console")
         self.chrome_path = get_correct_path("chromedriver.exe")
         self.args = ["", ]
-        self.opt.add_argument('headless')
+        # self.opt.add_argument('headless')
 
         w = self.root.winfo_reqwidth()
         h = self.root.winfo_reqheight()
@@ -171,18 +171,20 @@ class egybest:
                 i += 1
             except NoSuchElementException:
                 continue
-        driver.quit()
+        # driver.quit()
         i = 1
         for call in self.api_call:
             self.status_text.set("الطور الثاني الحلقه: " + str(i))
 
             try:
                 w = "https://deer.egybest.biz" + call
+                print(call)
                 headers = {
-                    'user-agent': str(agent),
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                     'cookie': "PSSID=" + str(cookie) + ";"
                 }
                 req = requests.post(w, headers=headers)
+                print(req.content)
                 soup = BeautifulSoup(req.content, 'html.parser')
                 episodes = soup.find_all(href=re.compile("/v/"), class_="bigbutton")
                 self.video_stream_links.append(episodes[0]['href'])

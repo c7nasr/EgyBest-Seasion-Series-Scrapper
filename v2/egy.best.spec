@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['egybest_gui.py'],
-             pathex=['D:\\Programming\\EgyBest Scrapper'],
+             pathex=['.'],
              binaries=[('chromedriver.exe', '.')],
              datas=[],
              hiddenimports=[],
