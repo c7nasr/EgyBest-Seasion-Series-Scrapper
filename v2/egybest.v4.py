@@ -1,19 +1,17 @@
 
 import ctypes
 import os
-import re
 import sys
-from PyQt5.QtCore import QMessageLogger
+import time
+import uuid
 
-import requests
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QTableWidgetItem
+import pyperclip
+from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.uic import loadUiType
 from qtpy import QtGui
-import pyperclip
-from bs4 import BeautifulSoup
 
-import threads
 import core
+import threads
 
 
 def get_correct_path(relative_path):
@@ -37,16 +35,23 @@ class egybest(QMainWindow, ui, threads.EBThreads, core.EgybestLogic):
         self.url = ""
         self.state = ""
         self.base_domain = ""
+        self.session_id = uuid.uuid4()
         self.setupUi(self)
         self.InitUI()
 
     def InitUI(self):
-        self.setFixedSize(570, 285)
+        self.setFixedSize(570, 320)
         self.setWindowIcon(QtGui.QIcon(get_correct_path('icon.ico')))
         self.assign_buttons()
         self.tableWidget.setColumnCount(4)
         self.tableWidget.setHorizontalHeaderLabels(
-            ['Episode Name', "Episode Size", "Status", "Season"])
+            ['Episode Name', "Episode Size", "Status", "Title"])
+        self.statusBar().showMessage(
+            f"Your current session ID: {self.session_id}")
+        self.comboBox.addItem("1080p")
+        self.comboBox.addItem("720p")
+        self.comboBox.addItem("480p")
+        self.comboBox.addItem("360p")
 
     def assign_buttons(self):
         self.pushButton.setEnabled(False)
@@ -64,15 +69,9 @@ class egybest(QMainWindow, ui, threads.EBThreads, core.EgybestLogic):
                 self.pushButton.setEnabled(True)
                 if url_check == "series":
                     self.state = "series"
-                    self.tableWidget.setColumnCount(3)
-                    self.tableWidget.setHorizontalHeaderLabels(
-                        ['Season', "Season Episodes", "Status"])
                 else:
                     self.url = current_clip
                     self.state = "season"
-                    self.tableWidget.setColumnCount(4)
-                    self.tableWidget.setHorizontalHeaderLabels(
-                        ['Episode Name', "Episode Size", "Status", "Season"])
 
         except Exception as e:
             print("I'm From handle_clipboard {}".format(e))
@@ -80,6 +79,8 @@ class egybest(QMainWindow, ui, threads.EBThreads, core.EgybestLogic):
     def handle_button(self):
         try:
             self.pushButton.setEnabled(False)
+            self.comboBox.setEnabled(False)
+            self.start_time = time.time()
             self.fetch_info()
             self.single_episode_info_thread()
         except Exception as e:
@@ -99,7 +100,7 @@ class egybest(QMainWindow, ui, threads.EBThreads, core.EgybestLogic):
         self.label_2.setText(text)
 
     def info_box(self, msg):
-        ctypes.windll.user32.MessageBoxW(0, msg, "EgyBest Scrapper V4.0", 1)
+        ctypes.windll.user32.MessageBoxW(0, msg, "EgyBest Scrapper V4.0", 0)
 
 
 def main():

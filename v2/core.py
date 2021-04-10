@@ -1,14 +1,16 @@
 
+import datetime as dt
 import os
 import re
-import humanize
-import requests
 import sys
 import time
+from urllib import request
+
+import humanize
+import requests
 from bs4 import BeautifulSoup
 from PyQt5.QtWidgets import QTableWidgetItem
 from selenium import webdriver
-from urllib import request
 
 
 def get_correct_path(relative_path):
@@ -29,27 +31,50 @@ class EgybestLogic:
         self.sizes = []
         self.selected_quality = "1080p"
 
+        self.series_seasons = []
+        self.series_name = ""
+
     def fetch_info(self):
+        self.selected_quality = self.comboBox.currentText()
         if self.state == "season":
             self.handle_season()
         elif self.state == "series":
-            # self.handle_series()
-            pass
+            self.handle_series()
+            self.series_signal_thread()
 
-    def handle_season(self):
+    def handle_series(self):
         page = requests.get(self.url)
-        self.change_status("Getting Season Info .... ")
+        self.change_status("Getting Series Info .... ")
+        soup = BeautifulSoup(page.content, 'html.parser')
+        all_seasons = soup.find_all(class_="movies_small")[0]
+        all_seasons = all_seasons.find_all(class_="movie")
+        series_name = soup.find(class_="movie_title")
+        for tag in series_name:
+            self.series_name = tag.text
+        for tag in all_seasons:
+            self.series_seasons.append(tag.get("href"))
+
+    def start_series_signal(self):
+        for i, season in enumerate(self.series_seasons):
+            self.url = season
+            self.handle_season(i)
+
+    def handle_season(self, i=1):
+        page = requests.get(self.url)
+        self.change_status(f"Getting Season {i} Info")
         soup = BeautifulSoup(page.content, 'html.parser')
         slug = self.url.split("/season/")
         self.slug = slug[1].replace("/", "")
-        season_name_div = soup.find(class_="movie_title")
-        for tag in season_name_div:
-            self.season_name = tag.text
+        if self.state == "season":
+            season_name_div = soup.find(class_="movie_title")
+            for tag in season_name_div:
+                self.season_name = tag.text
+        else:
+            self.season_name = self.series_name
         episodes = soup.find_all(href=re.compile("/episode/"), class_="movie")
         for link in set(episodes):
             self.episodes_links.append(link['href'])
         self.episodes_links.sort()
-        print(self.episodes_links)
         self.tableWidget.setRowCount(len(self.episodes_links))
         for i, episode in enumerate(self.episodes_links):
             self.tableWidget.setItem(
@@ -87,9 +112,11 @@ class EgybestLogic:
                 while True:
                     try:
                         self.driver.find_element_by_xpath(
+                            '/html/body/div').click()
+                        self.driver.find_element_by_xpath(
                             '//*[@id="video"]/div[4]/div[14]/button').click()
                         self.driver.find_element_by_xpath(
-                            '//*[@id="video"]/div[4]/div[14]/div/ul/li[1]').click()
+                            f'//*[@id="video"]/div[4]/div[14]/div/ul/li[{self.comboBox.currentIndex()+1}]').click()
                         break
                     except:
                         time.sleep(0.1)
@@ -138,6 +165,8 @@ class EgybestLogic:
             with open(self.season_name + '.txt', 'w') as f:
                 for item in self.direct_links:
                     f.write("%s\n" % item)
+            self.msgbox_thread("Done in {} ,Saved in text file. Total {} Size is {}".format(self.elapsed_humamized,
+                                                                                            self.season_name, self.sizes_humamized))
             self.episodes_links = []
             self.direct_links = []
             self.season_name = ""
@@ -145,7 +174,12 @@ class EgybestLogic:
             self.lineEdit.clear()
             self.change_status("Done, Waiting New Session ..")
             self.pushButton.setEnabled(True)
-            self.msgbox_thread("Done, {} Saved in text file. Total Season(s) Size: {}".format(
-                self.season_name, humanize.naturalsize(sum(self.sizes))))
+            self.comboBox.setEnabled(True)
+            self.end_time = time.time()
+            self.elapsed_time = self.end_time - self.start_time
+            self.elapsed_humamized = humanize.naturaldelta(
+                dt.timedelta(seconds=self.elapsed_time))
+            self.sizes_humamized = humanize.naturalsize(sum(self.sizes))
+
         except Exception as e:
             print(e)
