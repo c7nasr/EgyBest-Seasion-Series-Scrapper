@@ -95,7 +95,7 @@ class EgybestLogic:
     def single_episode_info(self):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--mute-audio")
-        chrome_options.headless = True
+        # chrome_options.headless = True
         self.driver = webdriver.Chrome(options=chrome_options)
         for i, episode in enumerate(self.episodes_links):
             self.tableWidget.setItem(i, 2, QTableWidgetItem(str("Phase I")))
@@ -124,7 +124,9 @@ class EgybestLogic:
                             f'//*[@id="video"]/div[4]/div[14]/div/ul/li[{self.comboBox.currentIndex()+1}]').click()
                         break
                     except:
-                        time.sleep(0.1)
+                        self.driver.find_element_by_xpath(
+                            '/html/body/div').click()
+                        time.sleep(1)
                         continue
                 self.tableWidget.setItem(
                     i, 2, QTableWidgetItem(str("Phase III")))
