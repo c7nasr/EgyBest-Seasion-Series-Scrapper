@@ -95,7 +95,7 @@ class EgybestLogic:
     def single_episode_info(self):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--mute-audio")
-        # chrome_options.headless = True
+        chrome_options.headless = True
         self.driver = webdriver.Chrome(options=chrome_options)
         for i, episode in enumerate(self.episodes_links):
             self.tableWidget.setItem(i, 2, QTableWidgetItem(str("Phase I")))
