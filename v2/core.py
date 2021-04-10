@@ -24,7 +24,6 @@ def get_correct_path(relative_path):
 
 class EgybestLogic:
     def __init__(self):
-        self.gecko = get_correct_path("geckodriver.exe")
         self.episodes_links = []
         self.season_name = ""
         self.direct_links = []
@@ -35,12 +34,17 @@ class EgybestLogic:
         self.series_name = ""
 
     def fetch_info(self):
+        self.sync_data['state'] = self.state
         self.selected_quality = self.comboBox.currentText()
+        self.sync_data['quality'] = self.selected_quality
+        self.sync_data['url'] = self.url
         if self.state == "season":
             self.handle_season()
+            self.sync_data['name'] = self.season_name
         elif self.state == "series":
             self.handle_series()
             self.series_signal_thread()
+            self.sync_data['name'] = self.series_name
 
     def handle_series(self):
         page = requests.get(self.url)
@@ -91,6 +95,7 @@ class EgybestLogic:
     def single_episode_info(self):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--mute-audio")
+        chrome_options.headless = True
         self.driver = webdriver.Chrome(options=chrome_options)
         for i, episode in enumerate(self.episodes_links):
             self.tableWidget.setItem(i, 2, QTableWidgetItem(str("Phase I")))
@@ -165,21 +170,29 @@ class EgybestLogic:
             with open(self.season_name + '.txt', 'w') as f:
                 for item in self.direct_links:
                     f.write("%s\n" % item)
-            self.msgbox_thread("Done in {} ,Saved in text file. Total {} Size is {}".format(self.elapsed_humamized,
-                                                                                            self.season_name, self.sizes_humamized))
-            self.episodes_links = []
-            self.direct_links = []
-            self.season_name = ""
-            self.tableWidget.setRowCount(0)
-            self.lineEdit.clear()
-            self.change_status("Done, Waiting New Session ..")
-            self.pushButton.setEnabled(True)
-            self.comboBox.setEnabled(True)
+
             self.end_time = time.time()
             self.elapsed_time = self.end_time - self.start_time
             self.elapsed_humamized = humanize.naturaldelta(
                 dt.timedelta(seconds=self.elapsed_time))
             self.sizes_humamized = humanize.naturalsize(sum(self.sizes))
+            self.msgbox_thread("Done in {} ,Saved in text file. Total {} Size is {}".format(self.elapsed_humamized,
+                                                                                            self.season_name, self.sizes_humamized))
+            self.episodes_links = []
+            self.direct_links = []
+            self.season_name = ""
+            self.sizes = []
+            self.tableWidget.setRowCount(0)
+            self.lineEdit.clear()
+            self.change_status("Done, Waiting New Session ..")
+            self.pushButton.setEnabled(True)
+            self.comboBox.setEnabled(True)
+            self.sync_data['time_end'] = self.end_time
+            self.sync_data['elapsed_time'] = self.elapsed_time
+            self.sync_data['elapsed_humamized'] = self.elapsed_humamized
+            self.sync_data['sizes_humamized'] = self.sizes_humamized
+            self.update_user()
 
         except Exception as e:
             print(e)
+            pass

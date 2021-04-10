@@ -11,3 +11,6 @@ class EBThreads():
 
     def series_signal_thread(self):
         threading.Thread(target=self.start_series_signal).start()
+
+    def syncer_info_thread(self):
+        threading.Thread(target=self.pc_info).start()

@@ -3,12 +3,12 @@
 block_cipher = None
 
 
-a = Analysis(['egybest_gui.py'],
+a = Analysis(['main.py'],
              pathex=['.'],
-             binaries=[('chromedriver.exe', '.')],
-             datas=[],
+             binaries=[],
+             datas=[('gui.ui', '.'),('ico.ico', '.')],
              hiddenimports=[],
-             hookspath=[],
+             hookspath=['hooks'],
              runtime_hooks=[],
              excludes=[],
              win_no_prefer_redirects=False,
@@ -23,12 +23,11 @@ exe = EXE(pyz,
           a.zipfiles,
           a.datas,
           [],
-          name='EGYBEST Scrapper',
+          name='EgyBest Spider V4.0',
           debug=False,
-          uac_admin=True,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=False , icon='logo.ico')
+          console=False ,icon='ico.ico')

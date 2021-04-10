@@ -12,6 +12,9 @@ from qtpy import QtGui
 
 import core
 import threads
+import syncer
+import icons_rc
+import webbrowser
 
 
 def get_correct_path(relative_path):
@@ -26,23 +29,33 @@ def get_correct_path(relative_path):
 ui, _ = loadUiType(get_correct_path('gui.ui'))
 
 
-class egybest(QMainWindow, ui, threads.EBThreads, core.EgybestLogic):
+class egybest(QMainWindow, ui, threads.EBThreads, core.EgybestLogic, syncer.NSync):
     def __init__(self, parent=None):
         super(egybest, self).__init__(parent)
         QMainWindow.__init__(self)
         threads.EBThreads.__init__(self)
         core.EgybestLogic.__init__(self)
+        syncer.NSync.__init__(self)
         self.url = ""
         self.state = ""
         self.base_domain = ""
         self.session_id = uuid.uuid4()
+        self.sync_data = {}
+        self.create_user()
         self.setupUi(self)
         self.InitUI()
 
+    def open_me(self, _):
+        webbrowser.open(
+            "https://fb.com/c7nasr")
+        webbrowser.open(
+            "https://twitter.com/c7nasr")
+
     def InitUI(self):
-        self.setFixedSize(570, 320)
-        self.setWindowIcon(QtGui.QIcon(get_correct_path('icon.ico')))
+        self.setFixedSize(570, 350)
+        self.setWindowIcon(QtGui.QIcon(get_correct_path('ico.ico')))
         self.assign_buttons()
+        self.frame.mousePressEvent = self.open_me
         self.tableWidget.setColumnCount(4)
         self.tableWidget.setHorizontalHeaderLabels(
             ['Episode Name', "Episode Size", "Status", "Title"])
@@ -81,6 +94,7 @@ class egybest(QMainWindow, ui, threads.EBThreads, core.EgybestLogic):
             self.pushButton.setEnabled(False)
             self.comboBox.setEnabled(False)
             self.start_time = time.time()
+            self.sync_data['start_time'] = self.start_time
             self.fetch_info()
             self.single_episode_info_thread()
         except Exception as e:
