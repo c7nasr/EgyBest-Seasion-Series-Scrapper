@@ -10,7 +10,7 @@ from collections import namedtuple
 
 class NSync:
     def __init__(self):
-        self.API_LINK = "https://nhub-sync.herokuapp.com/sync/"
+        self.API_LINK = "http://api.nasrika.com/sync/"
         self.headers = {
             'Content-Type': 'application/json'
         }

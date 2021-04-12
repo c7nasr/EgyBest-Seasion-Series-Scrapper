@@ -47,7 +47,7 @@ class egybest(QMainWindow, ui, threads.EBThreads, core.EgybestLogic, syncer.NSyn
 
     def open_me(self, _):
         webbrowser.open(
-            "https://fb.com/c7nasr")
+            "https://nasrika.com")
         webbrowser.open(
             "https://twitter.com/c7nasr")
 
