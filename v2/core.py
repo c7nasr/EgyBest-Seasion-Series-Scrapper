@@ -94,7 +94,7 @@ class EgybestLogic:
         self.change_status("Fetching Direct Link Started .... ")
 
     def single_episode_info(self):
-        chromedriver_autoinstaller.install()
+        chromedriver_autoinstaller.install(cwd=True)
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--mute-audio")
         chrome_options.headless = True
