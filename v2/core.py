@@ -102,7 +102,7 @@ class EgybestLogic:
 
         self.driver = webdriver.Chrome(options=chrome_options)
         for i, episode in enumerate(self.episodes_links):
-            self.tableWidget.setItem(i, 2, QTableWidgetItem(str("Phase I")))
+            self.tableWidget.setItem(i, 2, QTableWidgetItem(str("Phase I ")))
             req = requests.get(episode)
             soup = BeautifulSoup(req.content, 'html.parser')
             stream_link = soup.find(class_="auto-size")['src']
