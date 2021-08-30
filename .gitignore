@@ -95,7 +95,6 @@ celerybeat-schedule
 
 # SageMath parsed files
 *.sage.py
-*.txt
 # Environments
 .env
 .venv
@@ -122,4 +121,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-v2/chromedriver.exe
+
