@@ -5,23 +5,25 @@ import re
 import uuid
 import os
 import psutil
-from collections import namedtuple
 
 
 class NSync:
     def __init__(self):
-        self.API_LINK = "http://api.nasrika.com/sync/"
+        self.API_LINK = "https://api.nasrika.com/sync/"
         self.headers = {
             'Content-Type': 'application/json'
         }
 
     def create_user(self):
-        payload = {
-            'session_id': str(self.session_id),
-            'service': "EgyBest",
-            'info': self.pc_info(),
-        }
-        requests.post(f"{self.API_LINK}user/new", json=payload)
+        try:
+            payload = {
+                'session_id': str(self.session_id),
+                'service': "EgyBest",
+                'info': self.pc_info(),
+            }
+            requests.post(f"{self.API_LINK}user/new", json=payload)
+        except Exception as e:
+            print(e)
 
     def update_user(self):
         payload = {
@@ -34,7 +36,7 @@ class NSync:
     def pc_info(self):
         try:
             self.ip = requests.get(
-                'http://ip.jsontest.com/').json()["ip"]
+                'https://api.ipify.org/?format=json').json()["ip"]
             info = {}
             info['platform'] = platform.system()
             info['PlatformRelease'] = platform.release()

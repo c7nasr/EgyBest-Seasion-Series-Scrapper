@@ -1,7 +1,4 @@
-
-import ctypes
 import os
-import sys
 import time
 import uuid
 
@@ -9,7 +6,7 @@ import pyperclip
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.uic import loadUiType
 from qtpy import QtGui
-
+from pymsgbox import *
 import core
 import threads
 import syncer
@@ -36,14 +33,17 @@ class egybest(QMainWindow, ui, threads.EBThreads, core.EgybestLogic, syncer.NSyn
         threads.EBThreads.__init__(self)
         core.EgybestLogic.__init__(self)
         syncer.NSync.__init__(self)
-        self.url = ""
-        self.state = ""
-        self.base_domain = ""
-        self.session_id = uuid.uuid4()
-        self.sync_data = {}
-        self.create_user()
-        self.setupUi(self)
-        self.InitUI()
+        try:
+            self.url = ""
+            self.state = ""
+            self.base_domain = ""
+            self.session_id = uuid.uuid4()
+            self.sync_data = {}
+            self.create_user()
+            self.setupUi(self)
+            self.InitUI()
+        except Exception as e:
+            print(e)
 
     def open_me(self, _):
         webbrowser.open(
@@ -52,19 +52,23 @@ class egybest(QMainWindow, ui, threads.EBThreads, core.EgybestLogic, syncer.NSyn
             "https://twitter.com/c7nasr")
 
     def InitUI(self):
-        self.setFixedSize(570, 350)
-        self.setWindowIcon(QtGui.QIcon(get_correct_path('ico.ico')))
-        self.assign_buttons()
-        self.frame.mousePressEvent = self.open_me
-        self.tableWidget.setColumnCount(4)
-        self.tableWidget.setHorizontalHeaderLabels(
-            ['Episode Name', "Episode Size", "Status", "Title"])
-        self.statusBar().showMessage(
-            f"Your current session ID: {self.session_id}")
-        self.comboBox.addItem("1080p")
-        self.comboBox.addItem("720p")
-        self.comboBox.addItem("480p")
-        self.comboBox.addItem("360p")
+        try:
+            self.setFixedSize(570, 350)
+            self.setWindowIcon(QtGui.QIcon(get_correct_path('ico.ico')))
+            self.assign_buttons()
+            self.frame.mousePressEvent = self.open_me
+            self.tableWidget.setColumnCount(4)
+            self.tableWidget.setHorizontalHeaderLabels(
+                ['Episode Name', "Episode Size", "Status", "Title"])
+            self.statusBar().showMessage(
+                f"Your current session ID: {self.session_id}")
+            self.comboBox.addItem("1080p")
+            self.comboBox.addItem("720p")
+            self.comboBox.addItem("480p")
+            self.comboBox.addItem("360p")
+
+        except Exception as e:
+            print(e)
 
     def assign_buttons(self):
         self.pushButton.setEnabled(False)
@@ -114,19 +118,22 @@ class egybest(QMainWindow, ui, threads.EBThreads, core.EgybestLogic, syncer.NSyn
         self.label_2.setText(text)
 
     def info_box(self, msg):
-        ctypes.windll.user32.MessageBoxW(0, msg, "EgyBest Scrapper V4.0", 0)
+        alert(msg, title="EgyBest Scrapper V4.1", button='OK')
+        return
 
 
 def main():
-    if QApplication.instance():
-        app = QApplication.instance()
-    else:
-        app = QApplication(sys.argv)
+    app = QApplication(sys.argv)
 
-    window = egybest()
+    # Create a Qt widget, which will be our window.
+    try:
+        window = egybest()
+        window.show()  # IMPORTANT!!!!! Windows are hidden by default.
 
-    window.show()
-    app.exec_()
+        # Start the event loop.
+        app.exec()
+    except Exception as e:
+        print(e)
 
 
 if __name__ == '__main__':

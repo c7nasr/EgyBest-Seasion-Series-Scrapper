@@ -6,6 +6,7 @@ import sys
 import time
 from urllib import request
 
+import chromedriver_autoinstaller
 import humanize
 import requests
 from bs4 import BeautifulSoup
@@ -93,10 +94,12 @@ class EgybestLogic:
         self.change_status("Fetching Direct Link Started .... ")
 
     def single_episode_info(self):
+        chromedriver_autoinstaller.install()
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--mute-audio")
         chrome_options.headless = True
         chrome_options.add_argument('--log-level=OFF')
+
         self.driver = webdriver.Chrome(options=chrome_options)
         for i, episode in enumerate(self.episodes_links):
             self.tableWidget.setItem(i, 2, QTableWidgetItem(str("Phase I")))
